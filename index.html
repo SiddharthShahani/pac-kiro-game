@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pac-Kiro Game - Enhanced Edition with Intelligent AI</title>
+    <meta name="description" content="Play the enhanced Pac-Kiro game with intelligent ghost AI, visual effects, and persistent high scores! Built with vanilla JavaScript and HTML5 Canvas.">
+    <meta name="keywords" content="pac-man, game, javascript, html5, canvas, kiro, particles, retro, AI, ghosts">
+    <meta name="author" content="Kiro Workshop">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourusername.github.io/pac-kiro-game/">
+    <meta property="og:title" content="Pac-Kiro Game - Enhanced Edition with Intelligent AI">
+    <meta property="og:description" content="Play the enhanced Pac-Kiro game with intelligent ghost AI, visual effects, and persistent high scores!">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://yourusername.github.io/pac-kiro-game/">
+    <meta property="twitter:title" content="Pac-Kiro Game - Enhanced Edition with Intelligent AI">
+    <meta property="twitter:description" content="Play the enhanced Pac-Kiro game with intelligent ghost AI, visual effects, and persistent high scores!">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000000 0%, #1a0033 50%, #2d0066 100%);
+            color: white;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        #gameContainer {
+            text-align: center;
+            max-width: 100%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(121, 14, 203, 0.4);
+            box-shadow: 0 0 30px rgba(121, 14, 203, 0.3);
+        }
+        
+        #gameCanvas {
+            border: 3px solid #790ECB;
+            background-color: #000000;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(121, 14, 203, 0.6);
+        }
+        
+        #gameInfo {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            font-size: 18px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .score-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        #score, #highScore {
+            color: #790ECB;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(121, 14, 203, 0.9);
+            font-size: 18px;
+        }
+        
+        #lives {
+            color: #790ECB;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(121, 14, 203, 0.9);
+            font-size: 18px;
+        }
+        
+        #gameMessage {
+            margin: 20px 0;
+            font-size: 24px;
+            color: #790ECB;
+            min-height: 30px;
+            text-shadow: 0 0 15px rgba(121, 14, 203, 0.9);
+            font-weight: bold;
+        }
+        
+        .title {
+            color: #790ECB;
+            margin-bottom: 20px;
+            font-size: 3.5em;
+            text-shadow: 0 0 25px #790ECB, 0 0 50px #790ECB;
+            font-weight: bold;
+            letter-spacing: 4px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 25px #790ECB, 0 0 50px #790ECB; }
+            to { text-shadow: 0 0 35px #790ECB, 0 0 70px #790ECB, 0 0 90px #790ECB; }
+        }
+        
+        .subtitle {
+            color: #ffffff;
+            margin-bottom: 25px;
+            font-size: 1.3em;
+            opacity: 0.95;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        
+        .features {
+            margin-top: 35px;
+            font-size: 14px;
+            color: #cccccc;
+            max-width: 700px;
+            text-align: left;
+        }
+        
+        .features h3 {
+            color: #790ECB;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.4em;
+            text-shadow: 0 0 10px rgba(121, 14, 203, 0.8);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-item {
+            background: linear-gradient(135deg, rgba(121, 14, 203, 0.15) 0%, rgba(121, 14, 203, 0.05) 100%);
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(121, 14, 203, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(121, 14, 203, 0.3);
+            border-color: rgba(121, 14, 203, 0.6);
+        }
+        
+        .feature-item h4 {
+            color: #790ECB;
+            margin: 0 0 10px 0;
+            font-size: 1.15em;
+            text-shadow: 0 0 5px rgba(121, 14, 203, 0.6);
+        }
+        
+        .feature-item p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(121, 14, 203, 0.2) 0%, rgba(121, 14, 203, 0.1) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(121, 14, 203, 0.4);
+        }
+        
+        .controls h4 {
+            color: #790ECB;
+            margin: 0 0 15px 0;
+            font-size: 1.2em;
+            text-shadow: 0 0 8px rgba(121, 14, 203, 0.8);
+        }
+        
+        .controls p {
+            margin: 8px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .ai-showcase {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+        }
+        
+        .ai-showcase h4 {
+            color: #ff6666;
+            margin: 0 0 15px 0;
+            font-size: 1.2em;
+            text-shadow: 0 0 8px rgba(255, 100, 100, 0.6);
+        }
+        
+        .ghost-behaviors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .ghost-item {
+            text-align: center;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .ghost-item .ghost-emoji {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .ghost-item .ghost-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .ghost-item .ghost-behavior {
+            font-size: 11px;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+        
+        .github-link {
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, rgba(121, 14, 203, 0.3) 0%, rgba(121, 14, 203, 0.1) 100%);
+            border: 2px solid #790ECB;
+            border-radius: 8px;
+            color: #790ECB;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .github-link:hover {
+            background: linear-gradient(135deg, rgba(121, 14, 203, 0.5) 0%, rgba(121, 14, 203, 0.2) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(121, 14, 203, 0.4);
+            text-shadow: 0 0 10px rgba(121, 14, 203, 0.8);
+        }
+        
+        @media (max-width: 650px) {
+            #gameCanvas {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            #gameInfo {
+                font-size: 16px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .score-section {
+                align-items: center;
+            }
+            
+            .title {
+                font-size: 2.5em;
+                letter-spacing: 2px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ghost-behaviors {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #gameContainer {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 2em;
+                letter-spacing: 1px;
+            }
+            
+            #gameMessage {
+                font-size: 18px;
+            }
+            
+            .ghost-behaviors {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1 class="title">PAC-KIRO</h1>
+        <p class="subtitle">Enhanced Edition with Intelligent Ghost AI</p>
+        
+        <div id="gameInfo">
+            <div class="score-section">
+                <div id="score">Score: 0</div>
+                <div id="highScore">High Score: 0</div>
+            </div>
+            <div id="lives">Lives: 3</div>
+        </div>
+        
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        <div id="gameMessage">Use arrow keys or WASD to move! Press any movement key to start</div>
+        
+        <div class="controls">
+            <h4>🎮 How to Play:</h4>
+            <p>🔸 Use <strong>Arrow Keys or WASD</strong> to move Kiro around the maze</p>
+            <p>🔸 Collect all dots while avoiding the intelligent ghosts</p>
+            <p>🔸 Each ghost has unique AI behavior - learn their patterns!</p>
+            <p>🔸 Try to beat your high score for a confetti celebration!</p>
+        </div>
+        
+        <div class="ai-showcase">
+            <h4>🤖 Intelligent Ghost AI Behaviors:</h4>
+            <div class="ghost-behaviors">
+                <div class="ghost-item">
+                    <span class="ghost-emoji">🔴</span>
+                    <div class="ghost-name">Red Ghost</div>
+                    <div class="ghost-behavior">Aggressive chaser - always hunts you directly</div>
+                </div>
+                <div class="ghost-item">
+                    <span class="ghost-emoji">🩷</span>
+                    <div class="ghost-name">Pink Ghost</div>
+                    <div class="ghost-behavior">Smart ambusher - predicts your moves</div>
+                </div>
+                <div class="ghost-item">
+                    <span class="ghost-emoji">🩵</span>
+                    <div class="ghost-name">Cyan Ghost</div>
+                    <div class="ghost-behavior">Patrol hunter - chases when close</div>
+                </div>
+                <div class="ghost-item">
+                    <span class="ghost-emoji">🟠</span>
+                    <div class="ghost-name">Orange Ghost</div>
+                    <div class="ghost-behavior">Shy coward - flees when you're near</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <h3>✨ Enhanced Features</h3>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h4>🟣 Trail Particles</h4>
+                    <p>Purple particles follow Kiro as you move through the maze, creating a beautiful trail effect with the signature Kiro brand color.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>💥 Explosion Effects</h4>
+                    <p>Dynamic red and orange particle explosions when you collide with ghosts, providing clear visual feedback with realistic physics.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>✨ Sparkle Effects</h4>
+                    <p>White and yellow sparkle particles appear when collecting dots, making each collection feel rewarding with twinkling animations.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎊 Confetti Celebration</h4>
+                    <p>Multi-colored confetti animation with realistic physics when you achieve a new high score - including Kiro purple!</p>
+                </div>
+                <div class="feature-item">
+                    <h4>💾 Persistent Scores</h4>
+                    <p>Your high scores are automatically saved and persist across browser sessions using localStorage with error handling.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>⚡ Performance Optimized</h4>
+                    <p>Maintains smooth 60 FPS gameplay with automatic particle limiting, performance monitoring, and particle pooling.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🤖 Intelligent Ghost AI</h4>
+                    <p>Each ghost has unique behavior: Red chases directly, Pink ambushes, Cyan patrols, Orange flees when close - just like classic Pac-Man!</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎯 Gameplay Fixes</h4>
+                    <p>Fixed first dot collection and ghost respawn behavior for perfect gameplay experience every time you play!</p>
+                </div>
+            </div>
+        </div>
+        
+        <a href="https://github.com/yourusername/pac-kiro-game" class="github-link" target="_blank">
+            🔗 View Source Code on GitHub
+        </a>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
